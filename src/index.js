@@ -2,6 +2,10 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import { JSONSchema6 } from "json-schema";
+import { z } from "zod";
+import { createElement, Fragment } from "react";
+import ReactDOM from "react-dom";
 
 class NearSocialViewerElement extends HTMLElement {
     constructor() {
@@ -45,3 +49,53 @@ class NearSocialViewerElement extends HTMLElement {
 }
 
 customElements.define('near-social-viewer', NearSocialViewerElement);
+
+class HyperfilesComponent extends HTMLElement {
+    connectedCallback() {
+        this.render();
+    }
+
+    async render() {
+        const schema = {
+            title: "Example Schema",
+            type: "object",
+            properties: {
+                firstName: { type: "string" },
+                age: { type: "integer" }
+            },
+            required: ["firstName"]
+        };
+
+        const form = this.generateFormFromSchema(schema);
+        ReactDOM.render(createElement(form), this);
+    }
+
+    generateFormFromSchema(schema) {
+        const schemaValidator = z.object(schema);
+        return (props) => (
+            <form onSubmit={(e) => this.handleSubmit(e, schemaValidator)}>
+                {Object.entries(schema.properties).map(([key, value]) => (
+                    <Fragment key={key}>
+                        <label htmlFor={key}>{key}</label>
+                        <input type="text" id={key} name={key} required={schema.required.includes(key)} />
+                    </Fragment>
+                ))}
+                <button type="submit">Submit</button>
+            </form>
+        );
+    }
+
+    handleSubmit(e, schemaValidator) {
+        e.preventDefault();
+        const form = e.target;
+        const data = Object.fromEntries(new FormData(form).entries());
+        const result = schemaValidator.safeParse(data);
+        if (result.success) {
+            console.log("Validation succeeded:", result.data);
+        } else {
+            console.log("Validation failed:", result.error);
+        }
+    }
+}
+
+customElements.define('hyperfiles-component', HyperfilesComponent);
