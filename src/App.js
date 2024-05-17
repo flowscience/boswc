@@ -67,15 +67,8 @@ function App(props) {
           return <Link {...props} />;
         },
         RJSF: (props) => {
-          const { schema, uiSchema, formData, onChange, onSubmit } = props;
           return (
-            <Form
-              schema={schema}
-              uiSchema={uiSchema}
-              formData={formData}
-              onChange={onChange}
-              onSubmit={onSubmit}
-            />
+            <RJSF {...props} />
           );
         },   
       },
